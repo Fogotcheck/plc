@@ -26,4 +26,5 @@ repos:
 exclude: |
     (?x)^(
         Lib/StCube/.*|
+        Lib/FreeRTOS.*
     )$
