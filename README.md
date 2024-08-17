@@ -1,11 +1,11 @@
-# **[Проект plc](https://github.com/Fogotcheck/ProgramLogicController.git)**
+# **[Проект plc](https://github.com/Fogotcheck/plc)**
 
 ## *Клонирование репозитория*
 
 Клонировать репозиторий вы можете следующим образом:
 
 ```console
-git clone "https://github.com/Fogotcheck/ProgramLogicController.git"
+git clone "https://github.com/Fogotcheck/plc.git"
 ```
 ```console
 git submodule update --init --recursive
@@ -80,4 +80,4 @@ cmake --build ./build
 
 ## *Дополнительные ссылки*
 
-* [Трэкер задач](https://github.com/Fogotcheck/ProgramLogicController/issues/new/choose)
+* [Трэкер задач](https://github.com/Fogotcheck/plc/issues/new/choose)
