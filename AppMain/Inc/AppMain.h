@@ -6,4 +6,6 @@
 #include "task.h"
 #include "event_groups.h"
 
+#include "DLog.h"
+
 #endif //__AppMain_h__

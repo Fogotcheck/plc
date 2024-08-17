@@ -17,7 +17,10 @@ void MainThread(__attribute__((unused)) void *arg)
 	if (osKernelInitialize()) {
 		Error_Handler();
 	}
+	if (DLogInit()) {
+		Error_Handler();
+	}
 	while (1) {
-		/* code */
+		vTaskDelay(1000);
 	}
 }
