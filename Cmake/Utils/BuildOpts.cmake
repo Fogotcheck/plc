@@ -27,5 +27,5 @@ function(target_add_CPU_flags TargetName)
         ${MCPU_CORE}
         "USE_HAL_DRIVER"
         "__NEWLIB__"
-    )  
+    )
 endfunction(target_add_CPU_flags TargetName)

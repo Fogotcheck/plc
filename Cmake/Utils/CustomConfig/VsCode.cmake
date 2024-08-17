@@ -30,4 +30,3 @@ add_custom_target(MakeJsonVScode
     COMMENT "Moving .json files to .vscode folder"
     VERBATIM
 )
-
