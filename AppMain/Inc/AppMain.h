@@ -8,5 +8,7 @@
 
 #include "DLog.h"
 #include "Executor.h"
+#include "lwip.h"
+#include "MainEvent.h"
 
 #endif //__AppMain_h__

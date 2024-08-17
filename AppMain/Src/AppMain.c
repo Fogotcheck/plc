@@ -1,5 +1,7 @@
 #include "AppMain.h"
 
+EventGroupHandle_t MainEvent = NULL;
+
 void MainThread(void *arg);
 
 void AppMain(void)
@@ -17,10 +19,20 @@ void MainThread(__attribute__((unused)) void *arg)
 	if (osKernelInitialize()) {
 		Error_Handler();
 	}
+
+	MainEvent = xEventGroupCreate();
+	if (MainEvent == NULL) {
+		Error_Handler();
+	}
+
 	if (DLogInit()) {
 		Error_Handler();
 	}
 	if (ExeInit()) {
+		ErrMessage();
+		Error_Handler();
+	}
+	if (MX_LWIP_Init()) {
 		ErrMessage();
 		Error_Handler();
 	}
