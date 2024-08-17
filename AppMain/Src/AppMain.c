@@ -20,7 +20,11 @@ void MainThread(__attribute__((unused)) void *arg)
 	if (DLogInit()) {
 		Error_Handler();
 	}
-	DLogInit();
+	if (ExeInit()) {
+		ErrMessage();
+		Error_Handler();
+	}
+
 	while (1) {
 		vTaskDelay(1000);
 	}
