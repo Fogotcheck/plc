@@ -11,5 +11,6 @@
 #include "lwip.h"
 #include "MainEvent.h"
 #include "Support.h"
+#include "MqttClient.h"
 
 #endif //__AppMain_h__

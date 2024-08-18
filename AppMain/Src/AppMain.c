@@ -44,6 +44,12 @@ void MainThread(__attribute__((unused)) void *arg)
 		vTaskDelay(10);
 		Error_Handler();
 	}
+	if (MqttClientInit()) {
+		ErrMessage();
+		vTaskDelay(10);
+		Error_Handler();
+	}
+
 	vTaskDelay(1000);
 	DebugMessage("Init::OK");
 
@@ -69,16 +75,22 @@ void MainEventHandler(EventBits_t Event)
 
 	switch (Event) {
 	case ETH_LINK_UP:
-
+		MqttClientStart();
 		break;
 	case ETH_LINK_DOWN:
-
+		MqttClientStop();
 		break;
 	case MQTT_LINK_UP:
 
 		break;
 	case MQTT_LINK_DOWN:
 
+		break;
+
+	case MAIN_CRITICAL_ERR:
+		ErrMessage();
+		vTaskDelay(10);
+		Error_Handler();
 		break;
 	default:
 		break;
