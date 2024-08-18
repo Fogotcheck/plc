@@ -3,6 +3,7 @@
 EventGroupHandle_t MainEvent = NULL;
 
 void MainThread(void *arg);
+void MainEventHandler(EventBits_t Event);
 
 void AppMain(void)
 {
@@ -30,18 +31,56 @@ void MainThread(__attribute__((unused)) void *arg)
 	}
 	if (ExeInit()) {
 		ErrMessage();
+		vTaskDelay(10);
 		Error_Handler();
 	}
 	if (MX_LWIP_Init()) {
 		ErrMessage();
+		vTaskDelay(10);
 		Error_Handler();
 	}
 	if (SupportModuleInit()) {
 		ErrMessage();
+		vTaskDelay(10);
 		Error_Handler();
 	}
+	vTaskDelay(1000);
+	DebugMessage("Init::OK");
 
+	EventBits_t Event = 0;
+	EventBits_t Mask = 1;
 	while (1) {
-		vTaskDelay(1000);
+		Event = xEventGroupWaitBits(MainEvent, MAIN_ALL_EVENTS, pdFALSE,
+					    pdFALSE, portMAX_DELAY);
+		Mask = 1;
+		for (uint8_t i = 0; i < configUSE_16_BIT_TICKS; i++) {
+			if (Event & Mask) {
+				MainEventHandler(Event & Mask);
+			}
+			Mask <<= 1;
+		}
+	}
+}
+
+void MainEventHandler(EventBits_t Event)
+{
+	xEventGroupClearBits(MainEvent, Event);
+	DebugMessage("event::0x%x", Event);
+
+	switch (Event) {
+	case ETH_LINK_UP:
+
+		break;
+	case ETH_LINK_DOWN:
+
+		break;
+	case MQTT_LINK_UP:
+
+		break;
+	case MQTT_LINK_DOWN:
+
+		break;
+	default:
+		break;
 	}
 }
