@@ -107,7 +107,7 @@ int MX_LWIP_Init(void)
 	memset(&attributes, 0x0, sizeof(osThreadAttr_t));
 	attributes.name = "EthLink";
 	attributes.stack_size = INTERFACE_THREAD_STACK_SIZE;
-	attributes.priority = osPriorityBelowNormal;
+	attributes.priority = osPriorityRealtime7;
 	osThreadId_t ret =
 		osThreadNew(ethernet_link_thread, &gnetif, &attributes);
 	osDelay(2);

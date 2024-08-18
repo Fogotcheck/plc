@@ -5,6 +5,6 @@
 #define EXE_THR_SUFFIX_NAME "_ExeTask"
 #define EXE_THR_MAX_NAME 20
 #define EXE_THR_STACK 728
-#define EXE_THR_PRIORITIES (configMAX_PRIORITIES - 11)
+#define EXE_THR_PRIORITIES (osPriorityHigh7 - 1)
 
 #endif //__ExecutorDef_h__
