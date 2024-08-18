@@ -13,5 +13,7 @@
 #include "DLog.h"
 
 int ExeInit(void);
+void ExeStartAll(void);
+void ExeStopAll(void);
 
 #endif //__Executor_h__

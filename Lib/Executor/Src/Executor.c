@@ -37,7 +37,7 @@ void ExeThreads(void *arg)
 		vTaskDelete(NULL);
 	}
 	DebugMessage("Init::%d", Exe.ID);
-
+	vTaskSuspend(NULL);
 	EventBits_t Event = 0;
 	EventBits_t Mask = 1;
 	while (1) {
@@ -81,5 +81,25 @@ void ExeEventHandler(EventBits_t Event, ExecutorTypes_t *Exe)
 
 	default:
 		break;
+	}
+}
+
+void ExeStartAll(void)
+{
+	for (uint8_t i = 0; i < sizeof(ExeHandlers) / sizeof(ExeHandlers[0]);
+	     i++) {
+		if (ExeHandlers[i].Thr != NULL) {
+			vTaskResume(ExeHandlers[i].Thr);
+		}
+	}
+}
+
+void ExeStopAll(void)
+{
+	for (uint8_t i = 0; i < sizeof(ExeHandlers) / sizeof(ExeHandlers[0]);
+	     i++) {
+		if (ExeHandlers[i].Thr != NULL) {
+			vTaskSuspend(ExeHandlers[i].Thr);
+		}
 	}
 }

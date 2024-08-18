@@ -81,10 +81,10 @@ void MainEventHandler(EventBits_t Event)
 		MqttClientStop();
 		break;
 	case MQTT_LINK_UP:
-
+		ExeStartAll();
 		break;
 	case MQTT_LINK_DOWN:
-
+		ExeStopAll();
 		break;
 
 	case MAIN_CRITICAL_ERR:
