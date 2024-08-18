@@ -36,6 +36,10 @@ void MainThread(__attribute__((unused)) void *arg)
 		ErrMessage();
 		Error_Handler();
 	}
+	if (SupportModuleInit()) {
+		ErrMessage();
+		Error_Handler();
+	}
 
 	while (1) {
 		vTaskDelay(1000);

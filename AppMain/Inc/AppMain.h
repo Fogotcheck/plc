@@ -10,5 +10,6 @@
 #include "Executor.h"
 #include "lwip.h"
 #include "MainEvent.h"
+#include "Support.h"
 
 #endif //__AppMain_h__
