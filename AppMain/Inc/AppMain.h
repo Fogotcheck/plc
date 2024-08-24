@@ -12,5 +12,6 @@
 #include "MainEvent.h"
 #include "Support.h"
 #include "MqttClient.h"
+#include "Conf.h"
 
 #endif //__AppMain_h__

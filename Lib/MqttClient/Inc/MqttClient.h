@@ -19,5 +19,6 @@
 int MqttClientInit(void);
 void MqttClientStart(void);
 void MqttClientStop(void);
+int MqttClientReportRequest(MqttClientReport_t *Report);
 
 #endif //__MqttClient_h__

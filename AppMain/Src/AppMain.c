@@ -49,6 +49,11 @@ void MainThread(__attribute__((unused)) void *arg)
 		vTaskDelay(10);
 		Error_Handler();
 	}
+	if (ConfInit()) {
+		ErrMessage();
+		vTaskDelay(10);
+		Error_Handler();
+	}
 
 	vTaskDelay(1000);
 	DebugMessage("Init::OK");
@@ -81,9 +86,11 @@ void MainEventHandler(EventBits_t Event)
 		MqttClientStop();
 		break;
 	case MQTT_LINK_UP:
+		ConfSwitch(CONF_EN);
 		ExeStartAll();
 		break;
 	case MQTT_LINK_DOWN:
+		ConfSwitch(CONF_DIS);
 		ExeStopAll();
 		break;
 
