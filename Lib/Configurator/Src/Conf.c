@@ -3,6 +3,7 @@
 TaskHandle_t ConfHandle = NULL;
 QueueHandle_t ConfQueue = NULL;
 
+ConfChExecute_t Configs[EXE_THR_COUNT] = { 0 };
 static lwjson_stream_parser_t LwJsonStream;
 
 void ConfThread(void *arg);
@@ -30,11 +31,27 @@ void ConfThread(__attribute__((unused)) void *arg)
 	}
 	DebugMessage("init");
 	lwjson_stream_init(&LwJsonStream, prv_callback_func);
+
 	vTaskSuspend(ConfHandle);
+	lwjsonr_t res;
 	while (1) {
 		memset(&Buf, 0, sizeof(Buf));
 		xQueueReceive(ConfQueue, &Buf, portMAX_DELAY);
-		DebugMessage();
+
+		for (uint16_t i = 0; i < Buf.size; i++) {
+			res = lwjson_stream_parse(&LwJsonStream, Buf.data[i]);
+			switch (res) {
+			case lwjsonSTREAMINPROG:
+				break;
+			case lwjsonSTREAMWAITFIRSTCHAR:
+				break;
+			case lwjsonSTREAMDONE:
+				break;
+			default:
+				ErrMessage();
+				break;
+			}
+		}
 	}
 }
 

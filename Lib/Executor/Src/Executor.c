@@ -30,6 +30,14 @@ void ExeThreads(void *arg)
 	ExecutorTypes_t Exe = { 0 };
 	Exe.ID = (uint32_t)arg;
 	Exe.Handle = &ExeHandlers[Exe.ID];
+
+	Exe.Handle->Queue = xQueueCreate(1, sizeof(ConfChExecute_t));
+	if (Exe.Handle->Queue == NULL) {
+		ErrMessage("[%d]", Exe.ID);
+		Exe.Handle->Thr = NULL;
+		vTaskDelete(NULL);
+	}
+
 	Exe.Handle->Event = xEventGroupCreate();
 	if (Exe.Handle->Event == NULL) {
 		ErrMessage("[%d]", Exe.ID);

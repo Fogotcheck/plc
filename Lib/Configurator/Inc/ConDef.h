@@ -1,6 +1,9 @@
 #ifndef __ConfDef_h__
 #define __ConfDef_h__
 
+#include "SupportDef.h"
+#include "ExecutorDef.h"
+
 #define CONF_THR_NAME "ConfTask"
 #define CONF_THR_STACK 512
 #define CONF_THR_PRIOR (osPriorityHigh7)
