@@ -72,17 +72,17 @@
 /*----- Value in opt.h for TCPIP_THREAD_STACKSIZE: 0 -----*/
 #define TCPIP_THREAD_STACKSIZE 4096
 /*----- Value in opt.h for TCPIP_THREAD_PRIO: 1 -----*/
-#define TCPIP_THREAD_PRIO (osPriorityRealtime7-1)
+#define TCPIP_THREAD_PRIO (osPriorityRealtime7-2)
 /*----- Value in opt.h for TCPIP_MBOX_SIZE: 0 -----*/
 #define TCPIP_MBOX_SIZE 6
 /*----- Value in opt.h for SLIPIF_THREAD_STACKSIZE: 0 -----*/
 #define SLIPIF_THREAD_STACKSIZE 1024
 /*----- Value in opt.h for SLIPIF_THREAD_PRIO: 1 -----*/
-#define SLIPIF_THREAD_PRIO (osPriorityRealtime7-2)
+#define SLIPIF_THREAD_PRIO (osPriorityRealtime7-3)
 /*----- Value in opt.h for DEFAULT_THREAD_STACKSIZE: 0 -----*/
 #define DEFAULT_THREAD_STACKSIZE 1024
 /*----- Value in opt.h for DEFAULT_THREAD_PRIO: 1 -----*/
-#define DEFAULT_THREAD_PRIO (osPriorityRealtime7-3)
+#define DEFAULT_THREAD_PRIO (osPriorityRealtime7-4)
 /*----- Value in opt.h for DEFAULT_UDP_RECVMBOX_SIZE: 0 -----*/
 #define DEFAULT_UDP_RECVMBOX_SIZE 6
 /*----- Value in opt.h for DEFAULT_TCP_RECVMBOX_SIZE: 0 -----*/

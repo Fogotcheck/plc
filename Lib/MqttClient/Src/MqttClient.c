@@ -87,10 +87,12 @@ void MqttClientThread(__attribute__((unused)) void *arg)
 	DebugMessage("Init");
 	MqttClientReport_t Report = { 0 };
 	while (1) {
+		memset(&Report, 0, sizeof(Report));
 		xQueueReceive(MqttClientReportQueue, &Report, portMAX_DELAY);
 		char TopicName[MQTT_VAR_HEADER_BUFFER_LEN] = { 0 };
 		strcat(TopicName, TopicPreffix);
 		strcat(TopicName, Report.TopicName);
+
 		switch (Report.Type) {
 		case MQTT_PUB:
 			mqtt_publish(mqtt_client, TopicName, Report.TopicData,
@@ -107,11 +109,12 @@ void MqttClientThread(__attribute__((unused)) void *arg)
 		}
 
 		EventBits_t Event = xEventGroupWaitBits(
-			MqttEvent, MQTT_ALL, pdTRUE, pdFALSE,
+			MqttEvent, MQTT_ALL, pdFALSE, pdFALSE,
 			pdMS_TO_TICKS(MQTT_CONNECT_TIMOUT));
 		if (Event != MQTT_OK) {
-			WarningMessage();
+			WarningMessage("Event::ox%x", Event);
 		}
+		xEventGroupClearBits(MqttEvent, Event);
 	}
 }
 
@@ -124,16 +127,27 @@ static void mqtt_incoming_publish_cb(void *arg, const char *topic,
 
 	DebugMessage("%s\t%d", topic, (int)tot_len);
 }
-static void mqtt_incoming_data_cb(void *arg, const u8_t *data, u16_t len,
-				  u8_t flags)
+static void mqtt_incoming_data_cb(void *arg,
+				  __attribute__((unused)) const u8_t *data,
+				  u16_t len, u8_t flags)
 {
 	__attribute__((unused))
 	const struct mqtt_connect_client_info_t *client_info =
 		(const struct mqtt_connect_client_info_t *)arg;
 
-	LWIP_UNUSED_ARG(data);
-
+	ConfigBuf_t Buf = { 0 };
+	if (len > sizeof(Buf.data)) {
+		ErrMessage();
+		return;
+	}
+	memcpy(Buf.data, data, len);
+	Buf.size = (uint16_t)len;
+	Buf.flag = (uint8_t)flags;
 	DebugMessage("%d\t%d", (int)len, (int)flags);
+
+	if (ConfRequest(&Buf)) {
+		ErrMessage();
+	}
 }
 
 static void mqtt_connection_cb(mqtt_client_t *client, void *arg,
@@ -187,12 +201,12 @@ void MqttClientStop(void)
 	vTaskSuspend(MqttClientHandle);
 }
 
-int MqttClientReportRequest(MqttClientReport_t *Report)
+int MqttClientReportRequest(MqttClientReport_t *Request)
 {
-	int ret = xQueueSend(MqttClientReportQueue, Report, 0);
+	int ret = xQueueSend(MqttClientReportQueue, Request, 0);
 	if (ret != pdTRUE) {
 		vTaskDelay(MQTT_CONNECT_TIMOUT);
-		ret = xQueueSend(MqttClientReportQueue, Report, 0);
+		ret = xQueueSend(MqttClientReportQueue, Request, 0);
 	}
 
 	return ret == pdTRUE ? 0 : -1;
@@ -200,10 +214,10 @@ int MqttClientReportRequest(MqttClientReport_t *Report)
 
 static void mqtt_request_cb(__attribute__((unused)) void *arg, err_t err)
 {
-	DebugMessage("err %d", (int)err);
-	if (err != ERR_OK) {
+	if (err == ERR_OK) {
 		xEventGroupSetBits(MqttEvent, MQTT_OK);
 		return;
 	}
 	xEventGroupSetBits(MainEvent, MQTT_ERR);
+	ErrMessage("err %d", (int)err);
 }

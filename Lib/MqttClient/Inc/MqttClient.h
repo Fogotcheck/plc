@@ -16,6 +16,8 @@
 #include "MqttClientTypes.h"
 #include "MainEvent.h"
 
+#include "ConfTypes.h"
+
 int MqttClientInit(void);
 void MqttClientStart(void);
 void MqttClientStop(void);

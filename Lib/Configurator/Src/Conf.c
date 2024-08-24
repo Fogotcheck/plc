@@ -22,8 +22,8 @@ int ConfInit(void)
 
 void ConfThread(__attribute__((unused)) void *arg)
 {
-	char data[MQTT_VAR_HEADER_BUFFER_LEN] = { 0 };
-	ConfQueue = xQueueCreate(MQTT_VAR_HEADER_BUFFER_LEN, CONF_QUEUE_SIZE);
+	ConfigBuf_t Buf = { 0 };
+	ConfQueue = xQueueCreate(CONF_QUEUE_SIZE, sizeof(Buf));
 	if (ConfQueue == NULL) {
 		ErrMessage();
 		xEventGroupSetBits(MainEvent, MAIN_CRITICAL_ERR);
@@ -31,10 +31,10 @@ void ConfThread(__attribute__((unused)) void *arg)
 	DebugMessage("init");
 	lwjson_stream_init(&LwJsonStream, prv_callback_func);
 	vTaskSuspend(ConfHandle);
-
 	while (1) {
-		memset(data, 0, sizeof(data));
-		xQueueReceive(ConfQueue, data, portMAX_DELAY);
+		memset(&Buf, 0, sizeof(Buf));
+		xQueueReceive(ConfQueue, &Buf, portMAX_DELAY);
+		DebugMessage();
 	}
 }
 
@@ -48,13 +48,18 @@ void ConfSwitch(uint8_t State)
 	case CONF_DIS:
 		vTaskSuspend(ConfHandle);
 		break;
-	case CONF_EN:
+	case CONF_EN: {
 		vTaskResume(ConfHandle);
 		Report.Type = MQTT_PUB;
-		MqttClientReportRequest(&Report);
+		if (MqttClientReportRequest(&Report)) {
+			ErrMessage();
+		}
 		Report.Type = MQTT_SUB;
-		MqttClientReportRequest(&Report);
+		if (MqttClientReportRequest(&Report)) {
+			ErrMessage();
+		}
 		break;
+	}
 	default:
 		break;
 	}
@@ -66,4 +71,14 @@ static void prv_callback_func(lwjson_stream_parser_t *jsp,
 	if ((jsp->stack_pos < 2) || (type < LWJSON_STREAM_TYPE_STRING)) {
 		return;
 	}
+}
+
+int ConfRequest(ConfigBuf_t *Buf)
+{
+	int ret = xQueueSend(ConfQueue, Buf, 0);
+	if (ret != pdTRUE) {
+		vTaskDelay(10);
+		ret = xQueueSend(ConfQueue, Buf, 0);
+	}
+	return ret == pdTRUE ? 0 : -1;
 }
