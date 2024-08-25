@@ -14,3 +14,15 @@ int SupportModuleInit(void)
 
 	return 0;
 }
+
+int SupportGetInterface(char *Name, SupportInterface_t **ItemInterface)
+{
+	for (size_t i = 0; i < sizeof(Interfaces) / sizeof(Interfaces[0]);
+	     i++) {
+		if (strcmp(Interfaces[i].Name, Name) == 0) {
+			*ItemInterface = &Interfaces[i];
+			return 0;
+		}
+	}
+	return -1;
+}

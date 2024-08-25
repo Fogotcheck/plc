@@ -4,6 +4,7 @@ ExecutorHandle_t ExeHandlers[EXE_THR_COUNT] = { NULL };
 
 void ExeThreads(void *arg);
 void ExeEventHandler(EventBits_t Event, ExecutorTypes_t *Exe);
+int ExeInterfaceInit(ExecutorTypes_t *Exe);
 
 int ExeInit(void)
 {
@@ -58,6 +59,7 @@ void ExeThreads(void *arg)
 			}
 			Mask <<= 1;
 		}
+		vTaskDelay(10);
 	}
 }
 
@@ -68,7 +70,11 @@ void ExeEventHandler(EventBits_t Event, ExecutorTypes_t *Exe)
 
 	switch (Event) {
 	case EXE_INIT: {
-		/* code */
+		xQueueReceive(Exe->Handle->Queue, &Exe->Conf, 0);
+		if (ExeInterfaceInit(Exe)) {
+			break;
+		}
+
 		break;
 	}
 
@@ -110,4 +116,89 @@ void ExeStopAll(void)
 			vTaskSuspend(ExeHandlers[i].Thr);
 		}
 	}
+}
+
+int ExeConfigure(ConfChExecute_t *Conf)
+{
+	if (Conf->ch >= sizeof(ExeHandlers) / sizeof(ExeHandlers[0])) {
+		return -1;
+	}
+
+	if (xQueueOverwrite(ExeHandlers[Conf->ch].Queue, Conf) != pdPASS) {
+		return -1;
+	}
+	xEventGroupSetBits(ExeHandlers[Conf->ch].Event, EXE_INIT);
+	return 0;
+}
+
+int ExeInterfaceInit(ExecutorTypes_t *Exe)
+{
+	if (SupportGetInterface(Exe->Conf.Interface.Name, &Exe->Interface)) {
+		WarningMessage("Interface[%d]::\"%s\"-not support", Exe->ID,
+			       Exe->Conf.Interface.Name);
+		return -1;
+	}
+	if (Exe->Interface == NULL) {
+		ErrMessage("Interface[%d]", Exe->ID);
+		return -1;
+	}
+	if (Exe->Conf.Interface.Param[0] == 0) {
+		if (Exe->Interface->SetDefault == NULL) {
+			WarningMessage("Interface[%d]::No default param");
+		} else {
+			Exe->Interface->SetDefault(Exe->Interface,
+						   Exe->Conf.Interface.Param);
+		}
+	}
+	if ((Exe->Interface->Init == NULL) ||
+	    (Exe->Interface->DeInit == NULL)) {
+		ErrMessage("Interface[%d]", Exe->ID);
+		return -1;
+	}
+
+	if (Exe->Interface->DeInit(Exe->Interface)) {
+		ErrMessage("Interface[%d]", Exe->ID);
+	}
+	if (Exe->Interface->Init(Exe->Interface, Exe->Conf.Interface.Param)) {
+		ErrMessage("Interface[%d]", Exe->ID);
+	}
+
+	MqttClientReport_t Report = { 0 };
+	Report.Type = MQTT_PUB;
+	char tmp[MQTT_OUTPUT_RINGBUF_SIZE] = { 0 };
+	itoa(Exe->ID, tmp, 10);
+	strcat(Report.TopicName, "Executor[");
+	strcat(Report.TopicName, tmp);
+	strcat(Report.TopicName, "]/Interface/");
+	strcat(Report.TopicData, Exe->Interface->Name);
+	if (MqttClientReportRequest(&Report)) {
+		ErrMessage("Interface[%d]", Exe->ID);
+	}
+
+	if (Exe->Interface->ParamInterpret != NULL) {
+		for (uint16_t i = 0;
+		     i < sizeof(Exe->Conf.Interface.Param) /
+				 sizeof(Exe->Conf.Interface.Param[0]);
+		     i++) {
+			MqttClientReport_t ReportParam = { 0 };
+			ReportParam.Type = MQTT_PUB;
+			memset(tmp, 0, sizeof(tmp));
+			itoa(Exe->ID, tmp, 10);
+			strcat(ReportParam.TopicName, "Executor[");
+			strcat(ReportParam.TopicName, tmp);
+			strcat(ReportParam.TopicName, "]/Interface/Param/");
+			memset(tmp, 0, sizeof(tmp));
+			if (Exe->Interface->ParamInterpret(
+				    i, &Exe->Conf.Interface.Param[i], tmp,
+				    ReportParam.TopicData) == 0) {
+				strcat(ReportParam.TopicName, tmp);
+				if (MqttClientReportRequest(&ReportParam)) {
+					ErrMessage("Interface[%d]", Exe->ID);
+				}
+				vTaskDelay(MQTT_CLENT_TIMER_PERIOD_MS);
+			}
+		}
+	}
+
+	return 0;
 }

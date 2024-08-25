@@ -6,6 +6,7 @@
 #include "event_groups.h"
 #include "queue.h"
 #include "ConfTypes.h"
+#include "Support.h"
 
 typedef struct ExecutorHandle {
 	TaskHandle_t Thr;
@@ -17,8 +18,7 @@ typedef struct ExecutorTypes {
 	uint32_t ID;
 	ExecutorHandle_t *Handle;
 	ConfChExecute_t Conf;
+	SupportInterface_t *Interface;
 } ExecutorTypes_t;
-
-extern ExecutorHandle_t ExeHandlers[];
 
 #endif //__ExecutorTypes_h__

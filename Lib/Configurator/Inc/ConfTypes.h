@@ -33,5 +33,6 @@ typedef struct ConfChExecute {
 } ConfChExecute_t;
 
 int ConfRequest(ConfigBuf_t *Buf);
+int ExeConfigure(ConfChExecute_t *Conf);
 
 #endif //__ConfTypes_h__

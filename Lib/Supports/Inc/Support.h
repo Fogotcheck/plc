@@ -16,5 +16,6 @@ enum SupportInterfaceEnum {
 };
 
 int SupportModuleInit(void);
+int SupportGetInterface(char *Name, SupportInterface_t **ItemInterface);
 
 #endif //__Support_h__
