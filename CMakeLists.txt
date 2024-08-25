@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(plc VERSION 0.2.0 LANGUAGES C ASM)
+project(plc VERSION 0.2.1 LANGUAGES C ASM)
 
 include(Cmake/Utils/CustomOpts.cmake)
 include(Cmake/Utils/ComponentsOpts.cmake)
