@@ -6,6 +6,8 @@
 
 #include "spi.h"
 
+#include "Lis3dh.h"
+
 enum SupportInterfaceEnum {
 	SUP_SPI1,
 	SUP_SPI2,
@@ -15,7 +17,14 @@ enum SupportInterfaceEnum {
 	SUPPORT_INTERFACES_COUNT
 };
 
+enum SupportDriversEnum {
+	SUP_LIS3DH,
+
+	SUPPORT_DRIVERS_COUNT
+};
+
 int SupportModuleInit(void);
 int SupportGetInterface(char *Name, SupportInterface_t **ItemInterface);
+int SupportGetDriver(char *Name, SupportDrivers_t **ItemDriver);
 
 #endif //__Support_h__

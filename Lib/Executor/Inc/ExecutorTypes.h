@@ -19,6 +19,7 @@ typedef struct ExecutorTypes {
 	ExecutorHandle_t *Handle;
 	ConfChExecute_t Conf;
 	SupportInterface_t *Interface;
+	SupportDrivers_t *Driver;
 } ExecutorTypes_t;
 
 #endif //__ExecutorTypes_h__

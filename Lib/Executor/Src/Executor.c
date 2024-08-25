@@ -5,6 +5,7 @@ ExecutorHandle_t ExeHandlers[EXE_THR_COUNT] = { NULL };
 void ExeThreads(void *arg);
 void ExeEventHandler(EventBits_t Event, ExecutorTypes_t *Exe);
 int ExeInterfaceInit(ExecutorTypes_t *Exe);
+int ExeDriverInit(ExecutorTypes_t *Exe);
 
 int ExeInit(void)
 {
@@ -74,6 +75,9 @@ void ExeEventHandler(EventBits_t Event, ExecutorTypes_t *Exe)
 		if (ExeInterfaceInit(Exe)) {
 			break;
 		}
+		if (ExeDriverInit(Exe)) {
+			break;
+		}
 
 		break;
 	}
@@ -134,7 +138,7 @@ int ExeConfigure(ConfChExecute_t *Conf)
 int ExeInterfaceInit(ExecutorTypes_t *Exe)
 {
 	if (SupportGetInterface(Exe->Conf.Interface.Name, &Exe->Interface)) {
-		WarningMessage("Interface[%d]::\"%s\"-not support", Exe->ID,
+		WarningMessage("Interface[%d]::\"%s\" is n't support", Exe->ID,
 			       Exe->Conf.Interface.Name);
 		return -1;
 	}
@@ -197,6 +201,29 @@ int ExeInterfaceInit(ExecutorTypes_t *Exe)
 				}
 				vTaskDelay(MQTT_CLENT_TIMER_PERIOD_MS);
 			}
+		}
+	}
+
+	return 0;
+}
+
+int ExeDriverInit(ExecutorTypes_t *Exe)
+{
+	if (SupportGetDriver(Exe->Conf.Driver.Name, &Exe->Driver)) {
+		WarningMessage("Driver[%d]::\"%s\" is n't support", Exe->ID,
+			       Exe->Conf.Interface.Name);
+		return -1;
+	}
+	if (Exe->Driver == NULL) {
+		ErrMessage("Driver[%d]", Exe->ID);
+		return -1;
+	}
+	if (Exe->Conf.Driver.Param[0] == 0) {
+		if (Exe->Driver->SetDefault == NULL) {
+			WarningMessage("Driver[%d]::No default param");
+		} else {
+			Exe->Driver->SetDefault(Exe->Interface,
+						Exe->Conf.Driver.Param);
 		}
 	}
 

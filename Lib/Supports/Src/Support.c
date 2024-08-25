@@ -1,6 +1,7 @@
 #include "Support.h"
 
 SupportInterface_t Interfaces[SUPPORT_INTERFACES_COUNT] = { 0 };
+SupportDrivers_t Drivers[SUPPORT_DRIVERS_COUNT] = { 0 };
 
 int SupportModuleInit(void)
 {
@@ -10,6 +11,9 @@ int SupportModuleInit(void)
 		if (SpiGetHandle(&Interfaces[count], Type)) {
 			return -1;
 		}
+	}
+	if (Lis3dhGetHandle(&Drivers[SUP_LIS3DH])) {
+		return -1;
 	}
 
 	return 0;
@@ -24,5 +28,17 @@ int SupportGetInterface(char *Name, SupportInterface_t **ItemInterface)
 			return 0;
 		}
 	}
+	return -1;
+}
+
+int SupportGetDriver(char *Name, SupportDrivers_t **ItemDriver)
+{
+	for (size_t i = 0; i < sizeof(Drivers) / sizeof(Drivers[0]); i++) {
+		if (strcmp(Drivers[i].Name, Name) == 0) {
+			*ItemDriver = &Drivers[i];
+			return 0;
+		}
+	}
+
 	return -1;
 }

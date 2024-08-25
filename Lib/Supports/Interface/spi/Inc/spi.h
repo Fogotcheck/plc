@@ -1,9 +1,6 @@
 #ifndef __spi_h__
 #define __spi_h__
 
-#include <stdlib.h>
-#include <string.h>
-
 #include "main.h"
 #include "SupportTypes.h"
 
