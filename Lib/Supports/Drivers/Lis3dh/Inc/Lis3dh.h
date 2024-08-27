@@ -126,6 +126,16 @@ typedef struct Lsi3dhParamType {
 	uint8_t type;
 } Lsi3dhParamType_t;
 
+enum Lis3dh_Interpreter_Param {
+	LIS3DH_COUNT,
+	LIS3DH_OUT_X,
+	LIS3DH_OUT_Y,
+	LIS3DH_OUT_Z,
+	LIS3DH_OUT_ADC_1,
+	LIS3DH_OUT_ADC_2,
+	LIS3DH_OUT_ADC_3,
+};
+
 int Lis3dhGetHandle(SupportDrivers_t *Item);
 
 #endif //__Lis3dh_h__

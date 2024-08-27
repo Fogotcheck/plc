@@ -42,7 +42,8 @@ typedef int(DriverInit_t)(void *, uint32_t *);
 typedef int(DriverSetDefault_t)(void *, uint32_t *);
 typedef int(DriverRequest_t)(void *, uint32_t *, uint32_t *);
 typedef int(DriverParamInterpret_t)(uint32_t *, char *, char *);
-typedef int(DriverDataInterpret_t)(uint32_t *, uint32_t *, char *, char *);
+typedef void(DriverRawToCplt_t)(uint32_t *, uint32_t *, uint32_t *);
+typedef int(DriverInterpretData_t)(uint16_t, uint32_t *, char *, char *);
 
 typedef struct SupportDrivers {
 	char Name[SUPPORT_DRIVER_NAME_SIZE];
@@ -50,8 +51,8 @@ typedef struct SupportDrivers {
 	DriverSetDefault_t *SetDefault;
 	DriverRequest_t *Request;
 	DriverParamInterpret_t *ParamInterpret;
-	DriverDataInterpret_t *DataInterpret;
-
+	DriverRawToCplt_t *RawDataHandle;
+	DriverInterpretData_t *DataInterpret
 } SupportDrivers_t;
 
 #endif //__SupportTypes_h__

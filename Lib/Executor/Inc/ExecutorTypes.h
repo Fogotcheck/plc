@@ -18,13 +18,14 @@ typedef struct ExecutorHandle {
 } ExecutorHandle_t;
 
 typedef struct ExecutorBufs {
-	uint32_t tmp[SUPPORT_DRIVER_PARAM_SIZE];
-	uint32_t raw[SUPPORT_DRIVER_PARAM_SIZE];
-	uint32_t cplt[SUPPORT_DRIVER_PARAM_SIZE];
+	uint32_t tmp[SUPPORT_DRIVER_PARAM_SIZE + 1];
+	uint32_t raw[SUPPORT_DRIVER_PARAM_SIZE + 1];
+	uint32_t cplt[SUPPORT_DRIVER_PARAM_SIZE + 1];
 } ExecutorBufs_t;
 
 typedef struct ExecutorTypes {
 	uint32_t ID;
+	char Preffix[MQTT_OUTPUT_RINGBUF_SIZE];
 	ExecutorHandle_t *Handle;
 	ConfChExecute_t Conf;
 	SupportInterface_t *Interface;

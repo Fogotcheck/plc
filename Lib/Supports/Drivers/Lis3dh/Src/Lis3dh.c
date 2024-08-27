@@ -12,6 +12,10 @@ static inline int Lis3dhSpiRequest(SupportInterface_t *Interface,
 static inline int Lis3dhI2cRequest(SupportInterface_t *Interface,
 				   uint32_t *Param, uint32_t *Buf);
 static inline int Lis3dhParamInterpret(uint32_t *param, char *name, char *data);
+static inline void Lis3dhRawToCplt(uint32_t *param, uint32_t *raw,
+				   uint32_t *cplt);
+static inline int Lis3dhIterpretData(uint16_t type, uint32_t *cplt, char *name,
+				     char *data);
 
 int Lis3dhGetHandle(SupportDrivers_t *Item)
 {
@@ -21,6 +25,8 @@ int Lis3dhGetHandle(SupportDrivers_t *Item)
 	Item->SetDefault = Lis3dhSetDefaultParam;
 	Item->Request = Lis3dhRequest;
 	Item->ParamInterpret = Lis3dhParamInterpret;
+	Item->RawDataHandle = Lis3dhRawToCplt;
+	Item->DataInterpret = Lis3dhIterpretData;
 	return 0;
 }
 
@@ -350,5 +356,95 @@ static inline int Lis3dhParamInterpret(uint32_t *param, char *name, char *data)
 		return -1;
 	}
 	itoa(*param, data, 16);
+	return 0;
+}
+
+static inline void Lis3dhRawToCplt(uint32_t *param, uint32_t *raw,
+				   uint32_t *cplt)
+{
+	cplt[LIS3DH_COUNT] = LIS3DH_OUT_ADC_3 + 1;
+	for (uint16_t i = 0; i < SUPPORT_DRIVER_PARAM_SIZE; i++) {
+		Lsi3dhParamType_t *tmp = (Lsi3dhParamType_t *)&param[i];
+
+		switch (tmp->addr) {
+		case LIS3DH_ADD_OUT_ADC1_L:
+			cplt[LIS3DH_OUT_ADC_1] &= ~(0xff << 0);
+			cplt[LIS3DH_OUT_ADC_1] |= (raw[i] << 0);
+			break;
+		case LIS3DH_ADD_OUT_ADC1_H:
+			cplt[LIS3DH_OUT_ADC_1] &= ~(0xff << 8);
+			cplt[LIS3DH_OUT_ADC_1] |= (raw[i] << 8);
+			break;
+		case LIS3DH_ADD_OUT_ADC2_L:
+			cplt[LIS3DH_OUT_ADC_2] &= ~(0xff << 0);
+			cplt[LIS3DH_OUT_ADC_2] |= (raw[i] << 0);
+			break;
+		case LIS3DH_ADD_OUT_ADC2_H:
+			cplt[LIS3DH_OUT_ADC_2] &= ~(0xff << 8);
+			cplt[LIS3DH_OUT_ADC_2] |= (raw[i] << 8);
+			break;
+		case LIS3DH_ADD_OUT_ADC3_L:
+			cplt[LIS3DH_OUT_ADC_3] &= ~(0xff << 0);
+			cplt[LIS3DH_OUT_ADC_3] |= (raw[i] << 0);
+			break;
+		case LIS3DH_ADD_OUT_ADC3_H:
+			cplt[LIS3DH_OUT_ADC_3] &= ~(0xff << 8);
+			cplt[LIS3DH_OUT_ADC_3] |= (raw[i] << 8);
+			break;
+		case LIS3DH_ADD_OUT_X_L:
+			cplt[LIS3DH_OUT_X] &= ~(0xff << 0);
+			cplt[LIS3DH_OUT_X] |= (raw[i] << 0);
+			break;
+		case LIS3DH_ADD_OUT_X_H:
+			cplt[LIS3DH_OUT_X] &= ~(0xff << 8);
+			cplt[LIS3DH_OUT_X] |= (raw[i] << 8);
+			break;
+		case LIS3DH_ADD_OUT_Y_L:
+			cplt[LIS3DH_OUT_Y] &= ~(0xff << 0);
+			cplt[LIS3DH_OUT_Y] |= (raw[i] << 0);
+			break;
+		case LIS3DH_ADD_OUT_Y_H:
+			cplt[LIS3DH_OUT_Y] &= ~(0xff << 8);
+			cplt[LIS3DH_OUT_Y] |= (raw[i] << 8);
+			break;
+		case LIS3DH_ADD_OUT_Z_L:
+			cplt[LIS3DH_OUT_Z] &= ~(0xff << 0);
+			cplt[LIS3DH_OUT_Z] |= (raw[i] << 0);
+			break;
+		case LIS3DH_ADD_OUT_Z_H:
+			cplt[LIS3DH_OUT_Z] &= ~(0xff << 8);
+			cplt[LIS3DH_OUT_Z] |= (raw[i] << 8);
+			break;
+		}
+	}
+}
+
+static inline int Lis3dhIterpretData(uint16_t type, uint32_t *cplt, char *name,
+				     char *data)
+{
+	switch (type) {
+	case LIS3DH_OUT_X:
+		strcat(name, "OUT_X");
+		break;
+	case LIS3DH_OUT_Y:
+		strcat(name, "OUT_Y");
+		break;
+	case LIS3DH_OUT_Z:
+		strcat(name, "OUT_Z");
+		break;
+	case LIS3DH_OUT_ADC_1:
+		strcat(name, "ADC_1");
+		break;
+	case LIS3DH_OUT_ADC_2:
+		strcat(name, "ADC_2");
+		break;
+	case LIS3DH_OUT_ADC_3:
+		strcat(name, "ADC_3");
+		break;
+
+	default:
+		return -1;
+	}
+	itoa(*cplt, data, 10);
 	return 0;
 }
