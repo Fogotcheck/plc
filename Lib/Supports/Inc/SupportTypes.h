@@ -7,6 +7,9 @@
 #include "SupportDef.h"
 #include "main.h"
 
+#include "FreeRTOS.h"
+#include "event_groups.h"
+
 typedef struct GpioType {
 	GPIO_TypeDef *Port;
 	uint16_t Pin;
@@ -15,8 +18,14 @@ typedef struct GpioType {
 typedef int(InterfaceInit_t)(void *, uint32_t *);
 typedef int(InterfaceDeInit_t)(void *);
 typedef int(InterfaceSetDefault_t)(void *, uint32_t *);
-typedef void(InterfaceCB_t)(void *, uint32_t);
+typedef void(InterfaceCB_t)(EventGroupHandle_t, uint32_t);
 typedef int(InterfaceParamInterpret_t)(uint16_t, uint32_t *, char *, char *);
+
+typedef struct InterfaceCallBack {
+	EventBits_t BitRawData;
+	EventGroupHandle_t EventHandle;
+	InterfaceCB_t *Func;
+} InterfaceCallBack_t;
 
 typedef struct SupportInterface {
 	char Name[SUPPORT_INTERFACE_NAME_SIZE];
@@ -25,17 +34,23 @@ typedef struct SupportInterface {
 	InterfaceInit_t *Init;
 	InterfaceDeInit_t *DeInit;
 	InterfaceSetDefault_t *SetDefault;
-	InterfaceCB_t *CallBack;
+	InterfaceCallBack_t CallBack;
 	InterfaceParamInterpret_t *ParamInterpret;
 } SupportInterface_t;
 
 typedef int(DriverInit_t)(void *, uint32_t *);
 typedef int(DriverSetDefault_t)(void *, uint32_t *);
+typedef int(DriverRequest_t)(void *, uint32_t *, uint32_t *);
+typedef int(DriverParamInterpret_t)(uint32_t *, char *, char *);
+typedef int(DriverDataInterpret_t)(uint32_t *, uint32_t *, char *, char *);
 
 typedef struct SupportDrivers {
 	char Name[SUPPORT_DRIVER_NAME_SIZE];
 	DriverInit_t *Init;
 	DriverSetDefault_t *SetDefault;
+	DriverRequest_t *Request;
+	DriverParamInterpret_t *ParamInterpret;
+	DriverDataInterpret_t *DataInterpret;
 
 } SupportDrivers_t;
 

@@ -2,10 +2,12 @@
 
 ExecutorHandle_t ExeHandlers[EXE_THR_COUNT] = { NULL };
 
-void ExeThreads(void *arg);
+static void ExeThreads(void *arg);
 void ExeEventHandler(EventBits_t Event, ExecutorTypes_t *Exe);
 int ExeInterfaceInit(ExecutorTypes_t *Exe);
 int ExeDriverInit(ExecutorTypes_t *Exe);
+static inline void ExeCallBack(EventGroupHandle_t EventHandle, EventBits_t Bit);
+void ExeTimerCallback(TimerHandle_t xTimer);
 
 int ExeInit(void)
 {
@@ -13,26 +15,36 @@ int ExeInit(void)
 
 	for (uint32_t i = 0; i < sizeof(ExeHandlers) / sizeof(ExeHandlers[0]);
 	     i++) {
-		char ThrName[EXE_THR_MAX_NAME] = { 0 };
-		itoa(i, ThrName, 10);
-		strcat(ThrName, EXE_THR_SUFFIX_NAME);
-		if (xTaskCreate(ExeThreads, ThrName, EXE_THR_STACK, (void *)i,
+		char Name[EXE_THR_MAX_NAME] = { 0 };
+		itoa(i, Name, 10);
+		strcat(Name, EXE_THR_SUFFIX_NAME);
+		if (xTaskCreate(ExeThreads, Name, EXE_THR_STACK, (void *)i,
 				EXE_THR_PRIORITIES,
 				&ExeHandlers[i].Thr) != pdPASS) {
 			ret = -1;
 		}
+		memset(Name, 0, sizeof(Name));
+		itoa(i, Name, 10);
+		strcat(Name, EXE_TIMER_NAME);
+		ExeHandlers[i].Timer =
+			xTimerCreate(Name, pdMS_TO_TICKS(EXE_TIMER_PERIOD_MS),
+				     pdFALSE, NULL, ExeTimerCallback);
+		if (ExeHandlers[i].Timer == NULL) {
+			ErrMessage("ExeHandlers[%d]", i);
+			ret = -1;
+		}
+
 		vTaskDelay(10);
 	}
 
 	return ret;
 }
 
-void ExeThreads(void *arg)
+static void ExeThreads(void *arg)
 {
 	ExecutorTypes_t Exe = { 0 };
 	Exe.ID = (uint32_t)arg;
 	Exe.Handle = &ExeHandlers[Exe.ID];
-
 	Exe.Handle->Queue = xQueueCreate(1, sizeof(ConfChExecute_t));
 	if (Exe.Handle->Queue == NULL) {
 		ErrMessage("[%d]", Exe.ID);
@@ -46,13 +58,16 @@ void ExeThreads(void *arg)
 		Exe.Handle->Thr = NULL;
 		vTaskDelete(NULL);
 	}
+
+	ExecutorBufs_t Buf = { 0 };
+	Exe.Buf = &Buf;
+
 	DebugMessage("Init::%d", Exe.ID);
-	vTaskSuspend(NULL);
 	EventBits_t Event = 0;
 	EventBits_t Mask = 1;
 	while (1) {
-		Event = xEventGroupWaitBits(Exe.Handle->Event, 1, pdFALSE,
-					    pdFALSE, portMAX_DELAY);
+		Event = xEventGroupWaitBits(Exe.Handle->Event, EXE_ALL_EVENTS,
+					    pdFALSE, pdFALSE, portMAX_DELAY);
 		Mask = 1;
 		for (uint8_t i = 0; i < configUSE_16_BIT_TICKS; i++) {
 			if (Event & Mask) {
@@ -60,7 +75,6 @@ void ExeThreads(void *arg)
 			}
 			Mask <<= 1;
 		}
-		vTaskDelay(10);
 	}
 }
 
@@ -78,26 +92,40 @@ void ExeEventHandler(EventBits_t Event, ExecutorTypes_t *Exe)
 		if (ExeDriverInit(Exe)) {
 			break;
 		}
-
+		Exe->Interface->CallBack.BitRawData = EXE_HANDLE_DATA;
+		Exe->Interface->CallBack.EventHandle = Exe->Handle->Event;
+		Exe->Interface->CallBack.Func = ExeCallBack;
+		xTimerStart(Exe->Handle->Timer, 0);
 		break;
 	}
 
 	case EXE_REQUEST_DATA: {
-		/* code */
+		if (Exe->Driver->Request == NULL) {
+			ErrMessage("Exe[%d]", Exe->ID);
+			break;
+		}
+		if (Exe->Driver->Request(Exe->Interface, Exe->Conf.Driver.Param,
+					 Exe->Buf->tmp)) {
+			ErrMessage("Exe[%d]", Exe->ID);
+		}
 		break;
 	}
 
 	case EXE_HANDLE_DATA: {
-		/* code */
-		break;
-	}
-
-	case EXE_REPORT_DATA: {
-		/* code */
+		for (uint16_t j = 0;
+		     j < sizeof(Exe->Buf->tmp) / sizeof(Exe->Buf->tmp[0]);
+		     j++) {
+			if (Exe->Buf->tmp[j]) {
+				DebugMessage("TmpBuf[%d]::%d", j,
+					     Exe->Buf->tmp[j]);
+			}
+		}
+		xTimerStart(Exe->Handle->Timer, 0);
 		break;
 	}
 
 	default:
+		WarningMessage("Exe[%d]", Exe->ID);
 		break;
 	}
 }
@@ -199,7 +227,7 @@ int ExeInterfaceInit(ExecutorTypes_t *Exe)
 				if (MqttClientReportRequest(&ReportParam)) {
 					ErrMessage("Interface[%d]", Exe->ID);
 				}
-				vTaskDelay(MQTT_CLENT_TIMER_PERIOD_MS);
+				vTaskDelay(MQTT_CONNECT_TIMOUT);
 			}
 		}
 	}
@@ -226,6 +254,73 @@ int ExeDriverInit(ExecutorTypes_t *Exe)
 						Exe->Conf.Driver.Param);
 		}
 	}
+	if (Exe->Driver->Init == NULL) {
+		ErrMessage("Driver[%d]", Exe->ID);
+		return -1;
+	}
+	if (Exe->Driver->Init(Exe->Interface, Exe->Conf.Driver.Param)) {
+		ErrMessage("Driver[%d]", Exe->ID);
+		return -1;
+	}
+
+	MqttClientReport_t Report = { 0 };
+	Report.Type = MQTT_PUB;
+	char tmp[MQTT_OUTPUT_RINGBUF_SIZE] = { 0 };
+	itoa(Exe->ID, tmp, 10);
+	strcat(Report.TopicName, "Executor[");
+	strcat(Report.TopicName, tmp);
+	strcat(Report.TopicName, "]/Driver/");
+	strcat(Report.TopicData, Exe->Driver->Name);
+	if (MqttClientReportRequest(&Report)) {
+		ErrMessage("Interface[%d]", Exe->ID);
+	}
+
+	if (Exe->Driver->ParamInterpret != NULL) {
+		for (uint16_t i = 0;
+		     i < sizeof(Exe->Conf.Driver.Param) /
+				 sizeof(Exe->Conf.Driver.Param[0]);
+		     i++) {
+			MqttClientReport_t ReportParam = { 0 };
+			ReportParam.Type = MQTT_PUB;
+			memset(tmp, 0, sizeof(tmp));
+			itoa(Exe->ID, tmp, 10);
+			strcat(ReportParam.TopicName, "Executor[");
+			strcat(ReportParam.TopicName, tmp);
+			strcat(ReportParam.TopicName, "]/Driver/Param/");
+			memset(tmp, 0, sizeof(tmp));
+
+			if (Exe->Driver->ParamInterpret(
+				    &Exe->Conf.Driver.Param[i], tmp,
+				    ReportParam.TopicData) == 0) {
+				strcat(ReportParam.TopicName, tmp);
+				if (MqttClientReportRequest(&ReportParam)) {
+					ErrMessage("Interface[%d]", Exe->ID);
+				}
+				vTaskDelay(MQTT_CONNECT_TIMOUT);
+			}
+		}
+	}
 
 	return 0;
+}
+
+void ExeTimerCallback(TimerHandle_t xTimer)
+{
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+	for (uint16_t i = 0; i < sizeof(ExeHandlers) / sizeof(ExeHandlers[0]);
+	     i++) {
+		if (xTimer == ExeHandlers[i].Timer) {
+			if (ExeHandlers[i].Event != NULL) {
+				BaseType_t ret = xEventGroupSetBitsFromISR(
+					ExeHandlers[i].Event, EXE_REQUEST_DATA,
+					&xHigherPriorityTaskWoken);
+				DebugMessage("ExeHandlers[%d]::%x", i, ret);
+			}
+		}
+	}
+}
+
+static inline void ExeCallBack(EventGroupHandle_t EventHandle, EventBits_t Bit)
+{
+	osEventFlagsSet(EventHandle, Bit);
 }

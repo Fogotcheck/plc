@@ -10,6 +10,11 @@ enum Lis3dh_Operation {
 	READ = 0b10000000,
 };
 
+enum LIS3DH_INTERFACE_TYPE {
+	LIS3DH_SPI_TYPE,
+	LIS3DH_I2C_TYPE,
+};
+
 enum Lis3dh_Register_Mapping_Address {
 	LIS3DH_ADD_STATUS_REG_AUX = 0x07,
 	LIS3DH_ADD_OUT_ADC1_L = 0x08,
@@ -99,6 +104,27 @@ enum Lis3dh_Param_Type {
 	LIS3DH_WRITE_PARAM = 0xb,
 	LIS3DH_REQUEST_PARAM = 0xc,
 };
+
+enum Lis3dh_Default_Param {
+	LIS3DH_DEF_SYSTEM_INIT_0,
+	LIS3DH_DEF_SYSTEM_INIT_1,
+	LIS3DH_DEF_SYSTEM_INIT_2,
+	LIS3DH_DEF_SYSTEM_INIT_3,
+
+	LIS3DH_DEF_REQUEST_0,
+	LIS3DH_DEF_REQUEST_1,
+	LIS3DH_DEF_REQUEST_2,
+	LIS3DH_DEF_REQUEST_3,
+	LIS3DH_DEF_REQUEST_4,
+	LIS3DH_DEF_REQUEST_5,
+	LIS3DH_DEF_REQUEST_6,
+};
+
+typedef struct Lsi3dhParamType {
+	uint16_t data;
+	uint8_t addr;
+	uint8_t type;
+} Lsi3dhParamType_t;
 
 int Lis3dhGetHandle(SupportDrivers_t *Item);
 
