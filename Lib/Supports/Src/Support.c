@@ -24,6 +24,9 @@ int SupportModuleInit(void)
 	if (Lis3dhGetHandle(&Drivers[SUP_LIS3DH])) {
 		return -1;
 	}
+	if (Ds1820GetHandle(&Drivers[SUP_DS1820])) {
+		return -1;
+	}
 
 	return 0;
 }

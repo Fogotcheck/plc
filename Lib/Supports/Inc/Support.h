@@ -8,6 +8,7 @@
 #include "wire1.h"
 
 #include "Lis3dh.h"
+#include "ds1820.h"
 
 enum SupportInterfaceEnum {
 	SUP_SPI1,
@@ -22,6 +23,7 @@ enum SupportInterfaceEnum {
 
 enum SupportDriversEnum {
 	SUP_LIS3DH,
+	SUP_DS1820,
 
 	SUPPORT_DRIVERS_COUNT
 };

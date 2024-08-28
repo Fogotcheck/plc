@@ -70,7 +70,7 @@ static inline int Wire1SetDefault(void *Handle, uint32_t *Param)
 		return -1;
 	} while (0);
 
-	Param[WIRE1_BAUDRATE] = 9600;
+	Param[WIRE1_BAUDRATE] = 115200;
 	Param[WIRE1_WORDLENGTH] = UART_WORDLENGTH_8B;
 	Param[WIRE1_STOPBITS] = UART_STOPBITS_1;
 	Param[WIRE1_PARITY] = UART_PARITY_NONE;
