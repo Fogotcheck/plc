@@ -48,18 +48,18 @@ static inline int SpiInit(void *Handle, uint32_t *Param)
 		return -1;
 	}
 
-	hspi->Instance = (SPI_TypeDef *)Param[INSTANCE];
-	hspi->Init.Mode = Param[MODE];
-	hspi->Init.Direction = Param[DIRECTION];
-	hspi->Init.DataSize = Param[DATASIZE];
-	hspi->Init.CLKPolarity = Param[CLKPOLARITY];
-	hspi->Init.CLKPhase = Param[CLKPHASE];
-	hspi->Init.NSS = Param[NSS];
-	hspi->Init.BaudRatePrescaler = Param[BAUDRATEPRESCALER];
-	hspi->Init.FirstBit = Param[FIRSTBIT];
-	hspi->Init.TIMode = Param[TIMODE];
-	hspi->Init.CRCCalculation = Param[CRCCALCULATION];
-	hspi->Init.CRCPolynomial = Param[CRCPOLYNOMIAL];
+	hspi->Instance = (SPI_TypeDef *)Param[SPI_INSTANCE];
+	hspi->Init.Mode = Param[SPI_MODE];
+	hspi->Init.Direction = Param[SPI_DIRECTION];
+	hspi->Init.DataSize = Param[SPI_DATASIZE];
+	hspi->Init.CLKPolarity = Param[SPI_CLKPOLARITY];
+	hspi->Init.CLKPhase = Param[SPI_CLKPHASE];
+	hspi->Init.NSS = Param[SPI_NSS];
+	hspi->Init.BaudRatePrescaler = Param[SPI_BAUDRATEPRESCALER];
+	hspi->Init.FirstBit = Param[SPI_FIRSTBIT];
+	hspi->Init.TIMode = Param[SPI_TIMODE];
+	hspi->Init.CRCCalculation = Param[SPI_CRCCALCULATION];
+	hspi->Init.CRCPolynomial = Param[SPI_CRCPOLYNOMIAL];
 	if (HAL_SPI_Init(hspi) != HAL_OK) {
 		return -1;
 	}
@@ -77,27 +77,27 @@ static inline int SpiSetDefault(void *Handle, uint32_t *Param)
 
 	do {
 		if (hspi == &hspi1) {
-			Param[INSTANCE] = (uint32_t)SPI1;
+			Param[SPI_INSTANCE] = (uint32_t)SPI1;
 			break;
 		}
 		if (hspi == &hspi2) {
-			Param[INSTANCE] = (uint32_t)SPI2;
+			Param[SPI_INSTANCE] = (uint32_t)SPI2;
 			break;
 		}
 		return -1;
 	} while (0);
 
-	Param[MODE] = SPI_MODE_MASTER;
-	Param[DIRECTION] = SPI_DIRECTION_2LINES;
-	Param[DATASIZE] = SPI_DATASIZE_8BIT;
-	Param[CLKPOLARITY] = SPI_POLARITY_LOW;
-	Param[CLKPHASE] = SPI_PHASE_1EDGE;
-	Param[NSS] = SPI_NSS_SOFT;
-	Param[BAUDRATEPRESCALER] = SPI_BAUDRATEPRESCALER_8;
-	Param[FIRSTBIT] = SPI_FIRSTBIT_MSB;
-	Param[TIMODE] = SPI_TIMODE_DISABLE;
-	Param[CRCCALCULATION] = SPI_CRCCALCULATION_DISABLE;
-	Param[CRCPOLYNOMIAL] = 10;
+	Param[SPI_MODE] = SPI_MODE_MASTER;
+	Param[SPI_DIRECTION] = SPI_DIRECTION_2LINES;
+	Param[SPI_DATASIZE] = SPI_DATASIZE_8BIT;
+	Param[SPI_CLKPOLARITY] = SPI_POLARITY_LOW;
+	Param[SPI_CLKPHASE] = SPI_PHASE_1EDGE;
+	Param[SPI_NSS] = SPI_NSS_SOFT;
+	Param[SPI_BAUDRATEPRESCALER] = SPI_BAUDRATEPRESCALER_8;
+	Param[SPI_FIRSTBIT] = SPI_FIRSTBIT_MSB;
+	Param[SPI_TIMODE] = SPI_TIMODE_DISABLE;
+	Param[SPI_CRCCALCULATION] = SPI_CRCCALCULATION_DISABLE;
+	Param[SPI_CRCPOLYNOMIAL] = 10;
 
 	return 0;
 }
@@ -119,51 +119,51 @@ static inline int SpiParamInterpret(uint16_t type, uint32_t *param, char *name,
 				    char *data)
 {
 	switch (type) {
-	case INSTANCE: {
+	case SPI_INSTANCE: {
 		strcat(name, "INSTANCE 0x");
 		break;
 	}
-	case MODE: {
+	case SPI_MODE: {
 		strcat(name, "MODE 0x");
 		break;
 	}
-	case DIRECTION: {
+	case SPI_DIRECTION: {
 		strcat(name, "DIRECTION 0x");
 		break;
 	}
-	case DATASIZE: {
+	case SPI_DATASIZE: {
 		strcat(name, "DATASIZE 0x");
 		break;
 	}
-	case CLKPOLARITY: {
+	case SPI_CLKPOLARITY: {
 		strcat(name, "CLKPOLARITY 0x");
 		break;
 	}
-	case CLKPHASE: {
+	case SPI_CLKPHASE: {
 		strcat(name, "CLKPHASE 0x");
 		break;
 	}
-	case NSS: {
+	case SPI_NSS: {
 		strcat(name, "NSS 0x");
 		break;
 	}
-	case BAUDRATEPRESCALER: {
+	case SPI_BAUDRATEPRESCALER: {
 		strcat(name, "BAUDRATEPRESCALER 0x");
 		break;
 	}
-	case FIRSTBIT: {
+	case SPI_FIRSTBIT: {
 		strcat(name, "FIRSTBIT 0x");
 		break;
 	}
-	case TIMODE: {
+	case SPI_TIMODE: {
 		strcat(name, "TIMODE 0x");
 		break;
 	}
-	case CRCCALCULATION: {
+	case SPI_CRCCALCULATION: {
 		strcat(name, "CRCCALCULATION 0x");
 		break;
 	}
-	case CRCPOLYNOMIAL: {
+	case SPI_CRCPOLYNOMIAL: {
 		strcat(name, "CRCPOLYNOMIAL 0x");
 		break;
 	}

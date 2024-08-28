@@ -7,11 +7,20 @@ int SupportModuleInit(void)
 {
 	uint8_t count = 0;
 	uint8_t Type = 0;
-	for (count = 0, Type = SPI_TYPE_1; count < SPI_COUNT; count++, Type++) {
+	for (count = SUP_SPI1, Type = SPI_TYPE_1; Type < SPI_COUNT;
+	     count++, Type++) {
 		if (SpiGetHandle(&Interfaces[count], Type)) {
 			return -1;
 		}
 	}
+
+	for (count = SUP_WIRE1_1, Type = WIRE1_TYPE_1; Type < WIRE1_COUNT;
+	     count++, Type++) {
+		if (Wire1GetHandle(&Interfaces[count], Type)) {
+			return -1;
+		}
+	}
+
 	if (Lis3dhGetHandle(&Drivers[SUP_LIS3DH])) {
 		return -1;
 	}
