@@ -5,10 +5,10 @@
 #include "SupportTypes.h"
 
 #include "spi.h"
-// #include "wire1.h" ебанутая затея
+#include "wire1.h"
 
 #include "Lis3dh.h"
-// #include "ds1820.h" не работает
+#include "ds1820.h"
 
 enum SupportInterfaceEnum {
 	SUP_SPI1,

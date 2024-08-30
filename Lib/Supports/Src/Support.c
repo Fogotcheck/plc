@@ -14,19 +14,19 @@ int SupportModuleInit(void)
 		}
 	}
 
-	// for (count = SUP_WIRE1_1, Type = WIRE1_TYPE_1; Type < WIRE1_COUNT;
-	//      count++, Type++) {
-	// 	if (Wire1GetHandle(&Interfaces[count], Type)) {
-	// 		return -1;
-	// 	}
-	// }
+	for (count = SUP_WIRE1_1, Type = WIRE1_TYPE_1; Type < WIRE1_COUNT;
+	     count++, Type++) {
+		if (Wire1GetHandle(&Interfaces[count], Type)) {
+			return -1;
+		}
+	}
 
 	if (Lis3dhGetHandle(&Drivers[SUP_LIS3DH])) {
 		return -1;
 	}
-	// if (Ds1820GetHandle(&Drivers[SUP_DS1820])) {
-	// 	return -1;
-	// }
+	if (Ds1820GetHandle(&Drivers[SUP_DS1820])) {
+		return -1;
+	}
 
 	return 0;
 }

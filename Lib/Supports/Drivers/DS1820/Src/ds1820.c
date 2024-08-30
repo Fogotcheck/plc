@@ -7,41 +7,57 @@ int Ds1820GetHandle(SupportDrivers_t *Item)
 	memset(Item->Name, 0, sizeof(Item->Name));
 	strcat(Item->Name, DS1820_SUFFIX_NAME);
 	Item->Init = Ds1820Init;
-
 	extern UART_HandleTypeDef huart5;
+
 	if (HAL_HalfDuplex_EnableTransmitter(&huart5) != HAL_OK) {
 		return -1;
 	}
-	uint8_t TXbuf = 0xf0;
-	uint8_t RXbuf = 0;
-
-	if (HAL_UART_Transmit(&huart5, &TXbuf, 1, 100) != HAL_OK) {
-		ErrMessage();
-		return -1;
-	}
-
-	HAL_Delay(1);
 	if (HAL_HalfDuplex_EnableReceiver(&huart5) != HAL_OK) {
 		ErrMessage();
 		return -1;
 	}
-	if (HAL_UART_Receive(&huart5, &RXbuf, 1, 100) != HAL_OK) {
-		ErrMessage("RX::%hhu", RXbuf);
-		return -1;
-	}
-	if (RXbuf == 0x00) {
+	if (HAL_HalfDuplex_EnableTransmitter(&huart5) != HAL_OK) {
 		ErrMessage();
 		return -1;
 	}
-	HAL_Delay(1);
-	uint8_t convert_T[] = {
-		DS1820_NOID,
-		0x44,
-	};
+
+	const uint8_t convert_T[] = { 0xcc, 0x44 };
+
+	if (HAL_UART_Transmit(&huart5, convert_T, sizeof(convert_T), 100) !=
+	    HAL_OK) {
+		ErrMessage();
+		return -1;
+	}
+	HAL_Delay(750);
+
+	const uint8_t read_scratch[] = { 0xcc, 0xbe };
 
 	if (HAL_HalfDuplex_EnableTransmitter(&huart5) != HAL_OK) {
 		return -1;
 	}
+	if (HAL_HalfDuplex_EnableReceiver(&huart5) != HAL_OK) {
+		ErrMessage();
+		return -1;
+	}
+	if (HAL_HalfDuplex_EnableTransmitter(&huart5) != HAL_OK) {
+		ErrMessage();
+		return -1;
+	}
+
+	if (HAL_UART_Transmit(&huart5, read_scratch, sizeof(read_scratch),
+			      100) != HAL_OK) {
+		ErrMessage();
+		return -1;
+	}
+
+	if (HAL_HalfDuplex_EnableReceiver(&huart5) != HAL_OK) {
+		ErrMessage();
+		return -1;
+	}
+
+	HAL_UART_Receive_IT(&huart5, tmpRXbuf, sizeof(tmpRXbuf));
+
+	HAL_Delay(10000);
 
 	return 0;
 }
