@@ -47,7 +47,7 @@ static inline int Wire1Init(void *Handle, uint32_t *Param)
 	huart->Init.Mode = Param[WIRE1_MODE_TX_RX];
 	huart->Init.HwFlowCtl = Param[WIRE1_HWCONTROL];
 	huart->Init.OverSampling = Param[WIRE1_OVERSAMPLING];
-	if (HAL_HalfDuplex_Init(&huart4) != HAL_OK) {
+	if (HAL_HalfDuplex_Init(huart) != HAL_OK) {
 		return -1;
 	}
 	return 0;

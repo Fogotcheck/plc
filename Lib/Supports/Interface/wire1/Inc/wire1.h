@@ -4,7 +4,7 @@
 #include "main.h"
 #include "SupportTypes.h"
 
-#define WIRE1_SUFFIX_NAME "_wire_one"
+#define WIRE1_SUFFIX_NAME "_wire1"
 
 enum Wire1Type {
 	WIRE1_TYPE_1,
