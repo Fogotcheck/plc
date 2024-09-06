@@ -28,6 +28,10 @@ int SupportModuleInit(void)
 	// 	return -1;
 	// }
 
+	if (Adxl345GetHandle(&Drivers[SUP_ADXL345])) {
+		return -1;
+	}
+
 	return 0;
 }
 

@@ -63,7 +63,7 @@ static inline int Lis3dhSpiInit(SupportInterface_t *Interface, uint32_t *Param)
 	HAL_GPIO_WritePin(Interface->Gpio.Port, Interface->Gpio.Pin, 1);
 	HAL_Delay(10);
 
-	uint8_t TXbuf = READ | LIS3DH_ADD_WHO_AM_I;
+	uint8_t TXbuf = LIS3DH_READ | LIS3DH_ADD_WHO_AM_I;
 	uint8_t RXbuf = 0;
 
 	HAL_GPIO_WritePin(Interface->Gpio.Port, Interface->Gpio.Pin, 0);
@@ -81,14 +81,14 @@ static inline int Lis3dhSpiInit(SupportInterface_t *Interface, uint32_t *Param)
 		return -1;
 	}
 
-	Lsi3dhParamType_t hdr = { 0 };
+	DriverParamType_t hdr = { 0 };
 	for (uint16_t i = 0; i < SUPPORT_DRIVER_PARAM_SIZE; i++) {
-		Lsi3dhParamType_t *tmp = (Lsi3dhParamType_t *)&Param[i];
+		DriverParamType_t *tmp = (DriverParamType_t *)&Param[i];
 		hdr = *tmp;
-		if (tmp->type == LIS3DH_INIT_PARAM) {
+		if (tmp->type == INIT_PARAM) {
 			HAL_GPIO_WritePin(Interface->Gpio.Port,
 					  Interface->Gpio.Pin, 0);
-			hdr.addr |= WRITE;
+			hdr.addr |= LIS3DH_WRITE;
 			ret = HAL_SPI_Transmit(hspi, &hdr.addr, 1, 10);
 			if (ret) {
 				return -1;
@@ -132,48 +132,45 @@ static inline int Lis3dhSetDefaultParam(void *Handle, uint32_t *Param)
 static inline void Lis3dhSpiSetDefault(uint32_t *Param)
 {
 	Param[LIS3DH_DEF_SYSTEM_INIT_0] =
-		(LIS3DH_INIT_PARAM << LIS3DH_TYPE) |
-		(LIS3DH_ADD_CTRL_REG5 << LIS3DH_ADDR) |
-		(0b10000000 << LIS3DH_DATA); // reboot mem
+		(INIT_PARAM << OFS_TYPE) | (LIS3DH_ADD_CTRL_REG5 << OFS_ADDR) |
+		(0b10000000 << OFS_DATA); // reboot mem
 	Param[LIS3DH_DEF_SYSTEM_INIT_1] =
-		(LIS3DH_INIT_PARAM << LIS3DH_TYPE) |
-		(LIS3DH_ADD_TEMP_CFG_REG << LIS3DH_ADDR) |
-		(0b11000000 << LIS3DH_DATA); // en Temperature sensor
+		(INIT_PARAM << OFS_TYPE) |
+		(LIS3DH_ADD_TEMP_CFG_REG << OFS_ADDR) |
+		(0b11000000 << OFS_DATA); // en Temperature sensor
 	Param[LIS3DH_DEF_SYSTEM_INIT_2] =
-		(LIS3DH_INIT_PARAM << LIS3DH_TYPE) |
-		(LIS3DH_ADD_CTRL_REG1 << LIS3DH_ADDR) |
+		(INIT_PARAM << OFS_TYPE) | (LIS3DH_ADD_CTRL_REG1 << OFS_ADDR) |
 		(0b10010111
-		 << LIS3DH_DATA); // Turn normal mode and 1.344kHz data rate on
+		 << OFS_DATA); // Turn normal mode and 1.344kHz data rate on
 	Param[LIS3DH_DEF_SYSTEM_INIT_3] =
-		(LIS3DH_INIT_PARAM << LIS3DH_TYPE) |
-		(LIS3DH_ADD_CTRL_REG4 << LIS3DH_ADDR) |
+		(INIT_PARAM << OFS_TYPE) | (LIS3DH_ADD_CTRL_REG4 << OFS_ADDR) |
 		(0b10000000
-		 << LIS3DH_DATA); // Turn block data update on (for temperature sensing)
+		 << OFS_DATA); // Turn block data update on (for temperature sensing)
 
 	Param[LIS3DH_DEF_REQUEST_0] =
-		(LIS3DH_REQUEST_PARAM << LIS3DH_TYPE) |
-		(LIS3DH_ADD_STATUS_REG_AUX << LIS3DH_ADDR); // request status
+		(REQUEST_PARAM << OFS_TYPE) |
+		(LIS3DH_ADD_STATUS_REG_AUX << OFS_ADDR); // request status
 
 	Param[LIS3DH_DEF_REQUEST_1] =
-		(LIS3DH_REQUEST_PARAM << LIS3DH_TYPE) |
-		(LIS3DH_ADD_OUT_X_H << LIS3DH_ADDR); // request adc1 (xh)
+		(REQUEST_PARAM << OFS_TYPE) |
+		(LIS3DH_ADD_OUT_X_H << OFS_ADDR); // request adc1 (xh)
 	Param[LIS3DH_DEF_REQUEST_2] =
-		(LIS3DH_REQUEST_PARAM << LIS3DH_TYPE) |
-		(LIS3DH_ADD_OUT_X_L << LIS3DH_ADDR); // request adc1 (xl)
+		(REQUEST_PARAM << OFS_TYPE) |
+		(LIS3DH_ADD_OUT_X_L << OFS_ADDR); // request adc1 (xl)
 
 	Param[LIS3DH_DEF_REQUEST_3] =
-		(LIS3DH_REQUEST_PARAM << LIS3DH_TYPE) |
-		(LIS3DH_ADD_OUT_Y_H << LIS3DH_ADDR); // request adc1 (yh)
+		(REQUEST_PARAM << OFS_TYPE) |
+		(LIS3DH_ADD_OUT_Y_H << OFS_ADDR); // request adc1 (yh)
 	Param[LIS3DH_DEF_REQUEST_4] =
-		(LIS3DH_REQUEST_PARAM << LIS3DH_TYPE) |
-		(LIS3DH_ADD_OUT_Y_L << LIS3DH_ADDR); // request adc1 (yl)
+		(REQUEST_PARAM << OFS_TYPE) |
+		(LIS3DH_ADD_OUT_Y_L << OFS_ADDR); // request adc1 (yl)
 
 	Param[LIS3DH_DEF_REQUEST_5] =
-		(LIS3DH_REQUEST_PARAM << LIS3DH_TYPE) |
-		(LIS3DH_ADD_OUT_Z_H << LIS3DH_ADDR); // request adc1 (zh)
+		(REQUEST_PARAM << OFS_TYPE) |
+		(LIS3DH_ADD_OUT_Z_H << OFS_ADDR); // request adc1 (zh)
 	Param[LIS3DH_DEF_REQUEST_6] =
-		(LIS3DH_REQUEST_PARAM << LIS3DH_TYPE) |
-		(LIS3DH_ADD_OUT_Z_L << LIS3DH_ADDR); // request adc1 (zl)
+		(REQUEST_PARAM << OFS_TYPE) |
+		(LIS3DH_ADD_OUT_Z_L << OFS_ADDR); // request adc1 (zl)
 }
 
 static inline void Lis3dhI2cSetDefault(__attribute__((unused)) uint32_t *Param)
@@ -206,12 +203,12 @@ static inline int Lis3dhSpiRequest(SupportInterface_t *Interface,
 	SPI_HandleTypeDef *hspi = (SPI_HandleTypeDef *)Interface->Handle;
 	HAL_StatusTypeDef ret = 0;
 
-	Lsi3dhParamType_t hdr = { 0 };
+	DriverParamType_t hdr = { 0 };
 	for (uint16_t i = 0; i < SUPPORT_DRIVER_PARAM_SIZE; i++) {
-		Lsi3dhParamType_t *tmp = (Lsi3dhParamType_t *)&Param[i];
+		DriverParamType_t *tmp = (DriverParamType_t *)&Param[i];
 		hdr = *tmp;
-		hdr.addr |= READ;
-		if (tmp->type == LIS3DH_REQUEST_PARAM) {
+		hdr.addr |= LIS3DH_READ;
+		if (tmp->type == REQUEST_PARAM) {
 			HAL_GPIO_WritePin(Interface->Gpio.Port,
 					  Interface->Gpio.Pin, 0);
 			ret = HAL_SPI_Transmit(hspi, &hdr.addr, 1, 10);
@@ -248,7 +245,7 @@ static inline int Lis3dhI2cRequest(__attribute__((unused))
 
 static inline int Lis3dhParamInterpret(uint32_t *param, char *name, char *data)
 {
-	Lsi3dhParamType_t *tmp = (Lsi3dhParamType_t *)param;
+	DriverParamType_t *tmp = (DriverParamType_t *)param;
 	switch (tmp->addr) {
 	case LIS3DH_ADD_STATUS_REG_AUX:
 		strcat(name, "STATUS_REG_AUX 0x");
@@ -364,7 +361,7 @@ static inline void Lis3dhRawToCplt(uint32_t *param, uint32_t *raw,
 {
 	cplt[LIS3DH_COUNT] = LIS3DH_OUT_ADC_3 + 1;
 	for (uint16_t i = 0; i < SUPPORT_DRIVER_PARAM_SIZE; i++) {
-		Lsi3dhParamType_t *tmp = (Lsi3dhParamType_t *)&param[i];
+		DriverParamType_t *tmp = (DriverParamType_t *)&param[i];
 
 		switch (tmp->addr) {
 		case LIS3DH_ADD_OUT_ADC1_L:

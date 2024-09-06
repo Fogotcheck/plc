@@ -78,10 +78,16 @@ static inline int SpiSetDefault(void *Handle, uint32_t *Param)
 	do {
 		if (hspi == &hspi1) {
 			Param[SPI_INSTANCE] = (uint32_t)SPI1;
+			Param[SPI_BAUDRATEPRESCALER] = SPI_BAUDRATEPRESCALER_8;
+			Param[SPI_CLKPOLARITY] = SPI_POLARITY_LOW;
+			Param[SPI_CLKPHASE] = SPI_PHASE_1EDGE;
 			break;
 		}
 		if (hspi == &hspi2) {
 			Param[SPI_INSTANCE] = (uint32_t)SPI2;
+			Param[SPI_BAUDRATEPRESCALER] = SPI_BAUDRATEPRESCALER_16;
+			Param[SPI_CLKPOLARITY] = SPI_POLARITY_HIGH;
+			Param[SPI_CLKPHASE] = SPI_PHASE_2EDGE;
 			break;
 		}
 		return -1;
@@ -90,10 +96,7 @@ static inline int SpiSetDefault(void *Handle, uint32_t *Param)
 	Param[SPI_MODE] = SPI_MODE_MASTER;
 	Param[SPI_DIRECTION] = SPI_DIRECTION_2LINES;
 	Param[SPI_DATASIZE] = SPI_DATASIZE_8BIT;
-	Param[SPI_CLKPOLARITY] = SPI_POLARITY_LOW;
-	Param[SPI_CLKPHASE] = SPI_PHASE_1EDGE;
 	Param[SPI_NSS] = SPI_NSS_SOFT;
-	Param[SPI_BAUDRATEPRESCALER] = SPI_BAUDRATEPRESCALER_8;
 	Param[SPI_FIRSTBIT] = SPI_FIRSTBIT_MSB;
 	Param[SPI_TIMODE] = SPI_TIMODE_DISABLE;
 	Param[SPI_CRCCALCULATION] = SPI_CRCCALCULATION_DISABLE;

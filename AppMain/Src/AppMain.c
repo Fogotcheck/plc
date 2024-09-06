@@ -84,6 +84,7 @@ void MainEventHandler(EventBits_t Event)
 		break;
 	case ETH_LINK_DOWN:
 		MqttClientStop();
+		ExeStopAll();
 		break;
 	case MQTT_LINK_UP:
 		ConfSwitch(CONF_EN);

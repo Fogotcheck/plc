@@ -10,6 +10,24 @@
 #include "FreeRTOS.h"
 #include "event_groups.h"
 
+enum Param_Offset {
+	OFS_TYPE = 24,
+	OFS_ADDR = 16,
+	OFS_DATA = 0,
+};
+
+enum Param_Type {
+	INIT_PARAM = 0xa,
+	WRITE_PARAM = 0xb,
+	REQUEST_PARAM = 0xc,
+};
+
+typedef struct DriverParamType {
+	uint16_t data;
+	uint8_t addr;
+	uint8_t type;
+} DriverParamType_t;
+
 typedef struct GpioType {
 	GPIO_TypeDef *Port;
 	uint16_t Pin;
