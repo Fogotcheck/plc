@@ -29,6 +29,10 @@ void MainThread(__attribute__((unused)) void *arg)
 	if (DLogInit()) {
 		Error_Handler();
 	}
+	if (LedInit()) {
+		ErrMessage();
+		Error_Handler();
+	}
 	if (ExeInit()) {
 		ErrMessage();
 		vTaskDelay(10);
@@ -58,6 +62,15 @@ void MainThread(__attribute__((unused)) void *arg)
 	vTaskDelay(1000);
 	DebugMessage("Init::OK");
 
+	for (uint8_t i = 0; i < LED_ERR; i++) {
+		if (LedStart(i, 1000 * (i + 1))) {
+			WarningMessage();
+		}
+	}
+	if (LedStop(LED_ERR)) {
+		WarningMessage();
+	}
+
 	EventBits_t Event = 0;
 	EventBits_t Mask = 1;
 	while (1) {
@@ -81,17 +94,23 @@ void MainEventHandler(EventBits_t Event)
 	switch (Event) {
 	case ETH_LINK_UP:
 		MqttClientStart();
+		LedStart(LED_LINK, 200);
 		break;
 	case ETH_LINK_DOWN:
 		MqttClientStop();
+		LedStart(LED_LINK, 2000);
 		ExeStopAll();
 		break;
 	case MQTT_LINK_UP:
 		ConfSwitch(CONF_EN);
+		LedStart(LED_LINK, 0);
+		LedStop(LED_ERR);
 		ExeStartAll();
 		break;
 	case MQTT_LINK_DOWN:
 		ConfSwitch(CONF_DIS);
+		LedStart(LED_LINK, 2000);
+		LedStart(LED_ERR, 200);
 		ExeStopAll();
 		break;
 
